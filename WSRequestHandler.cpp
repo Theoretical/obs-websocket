@@ -46,6 +46,7 @@ WSRequestHandler::WSRequestHandler(QWebSocket *client) :
 	messageMap["GetTransitionList"] = WSRequestHandler::HandleGetTransitionList;
 	messageMap["GetCurrentTransition"] = WSRequestHandler::HandleGetCurrentTransition;
 	messageMap["SetCurrentTransition"] = WSRequestHandler::HandleSetCurrentTransition;
+	messageMap["ModifySceneItem"] = WSRequestHandler::HandleModifySceneItem;
 
 	messageMap["SetVolume"] = WSRequestHandler::HandleSetVolume;
 	messageMap["GetVolume"] = WSRequestHandler::HandleGetVolume;
@@ -389,6 +390,26 @@ void WSRequestHandler::HandleGetVolume(WSRequestHandler *owner) {
 	obs_source_release(item);
 }
 
+void WSRequestHandler::HandleModifySceneItem(WSRequestHandler* owner) {
+	obs_source_t *current_scene = obs_frontend_get_current_scene();
+	const char *scene_name = obs_data_get_string(owner->_requestData, "scene-name");
+	const char *scene_value = obs_data_get_string(owner->_requestData, "scene-value");
+	const char *scene_type = obs_data_get_string(owner->_requestData, "scene-type");
+
+	obs_sceneitem_t *item = Utils::GetSceneItemFromName(current_scene, scene_name);
+	obs_data_t * settings = obs_source_get_settings(obs_sceneitem_get_source(item));
+
+	obs_data_set_string(settings, scene_type, scene_value);
+	blog(LOG_INFO, "[obs-websockets] set (%s) to value (%s)", scene_name, scene_value);
+
+	obs_source_update(obs_sceneitem_get_source(item), settings);
+	obs_data_release(settings);
+	obs_sceneitem_release(item);
+	owner->SendOKResponse();
+
+	obs_source_release(current_scene);
+
+}
 void WSRequestHandler::ErrNotImplemented(WSRequestHandler *owner) {
 	owner->SendErrorResponse("not implemented");
 }

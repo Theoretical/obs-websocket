@@ -98,6 +98,6 @@ void WSServer::socketDisconnected()
 		_clients.removeAll(pHandler);
 		_clMutex.unlock();
 
-		pHandler->deleteLater();
+//		pHandler->deleteLater();
 	}
 }
