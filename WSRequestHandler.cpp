@@ -47,6 +47,7 @@ WSRequestHandler::WSRequestHandler(QWebSocket *client) :
 	messageMap["GetCurrentTransition"] = WSRequestHandler::HandleGetCurrentTransition;
 	messageMap["SetCurrentTransition"] = WSRequestHandler::HandleSetCurrentTransition;
 	messageMap["ModifySceneItem"] = WSRequestHandler::HandleModifySceneItem;
+	messageMap["SaveReplay"] = WSRequestHandler::HandleSaveReplay;
 
 	messageMap["SetVolume"] = WSRequestHandler::HandleSetVolume;
 	messageMap["GetVolume"] = WSRequestHandler::HandleGetVolume;
@@ -408,8 +409,17 @@ void WSRequestHandler::HandleModifySceneItem(WSRequestHandler* owner) {
 	owner->SendOKResponse();
 
 	obs_source_release(current_scene);
-
 }
+
+void WSRequestHandler::HandleSaveReplay(WSRequestHandler* owner) {
+	obs_output_t *replay_buffer = obs_frontend_get_replay_buffer_output();
+	proc_handler_t *replay_proc = obs_output_get_proc_handler(replay_buffer);
+	
+	proc_handler_call(replay_proc, "save", NULL);
+
+	owner->SendOKResponse();
+}
+
 void WSRequestHandler::ErrNotImplemented(WSRequestHandler *owner) {
 	owner->SendErrorResponse("not implemented");
 }

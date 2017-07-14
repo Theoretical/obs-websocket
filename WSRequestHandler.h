@@ -73,6 +73,7 @@ class WSRequestHandler : public QObject
 		static void HandleSetVolume(WSRequestHandler *owner);
 		static void HandleGetVolume(WSRequestHandler *owner);
 		static void HandleModifySceneItem(WSRequestHandler* owner);
+		static void HandleSaveReplay(WSRequestHandler* owner);
 };
 
 #endif // WSPROTOCOL_H
